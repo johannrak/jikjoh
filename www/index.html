@@ -170,7 +170,7 @@
                 var gender = $("#select-gender").find("option:selected").val();
                 var weight = $("#weight").val();
                 var height = $("#height").val();
-                $.post("register.php",{ usernameRegister:usernameRegister, passwordRegister: passwordRegister, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
+                $.post("https://jikjoh.000webhostapp.com/register.php",{ usernameRegister:usernameRegister, passwordRegister: passwordRegister, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
                     if (response == true) {
                       alert("Your account has been created successfully!");
                       $.mobile.changePage("#registerpage1");
@@ -211,7 +211,7 @@
           $("#btnLogin").click(function(){
               var usu = $("#txtuser").val();
               var pass = $("#txtpassword").val();
-              $.post("login.php",{ usu : usu, pass : pass},function(response){
+              $.post("https://jikjoh.000webhostapp.com/login.php",{ usu : usu, pass : pass},function(response){
                   var row = JSON.parse(response);
                   localStorage.setItem('id', parseInt(row.id));
                   localStorage.setItem('firstname',row.firstname);
@@ -248,7 +248,7 @@
             var gender = $("#edit-select-gender").find("option:selected").val();
             var weight = $("#editweight").val();
             var height = $("#editheight").val();
-            $.post("update.php",{ id : id, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
+            $.post("https://jikjoh.000webhostapp.com/update.php",{ id : id, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
                 if (response == true) {
                   alert("Your account has been updated successfully!");
                   $.mobile.changePage("#settings");
