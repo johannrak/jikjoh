@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, 	initial-scale=1">
+    <title>MyFitness</title>
+    <link rel="stylesheet" href="js/jquery.mobile-1.4.5.css">
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.mobile-1.4.5.js"></script>
+    <script src="js/running.js"></script>
+    <script src="cordova.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.5.1/dist/leaflet.css" integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ==" crossorigin="">
+    <script src="https://unpkg.com/leaflet@1.5.1/dist/leaflet.js" integrity="sha512-GffPMF3RvMeYyc1LWMHtK8EbPv0iNZ8/oTtHPx9/cc2ILxQ+u905qIwdpULaqDkyBKgOaB57QTMg7ztg8Jm2Og==" crossorigin=""></script>
+
+
+    <link rel="stylesheet" href="style.css">
+
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function(){
+        var start = document.getElementById("btnStartExercise");
+        var stop = document.getElementById("btnStopExercise");
+        var lblTimer = document.getElementById("counterExercise");
+        var lblRecovery = document.getElementById("counterRecovery");
+        var audio = document.getElementById("myAudio");
+        var btnQuit = document.getElementById("quitTimer");
+        var timer;
+        var timer1;
+        var time = 0;
+        var time1 = 0;
+        var recovery = 36;
+        var set = 1;
+        var lblSet = document.getElementById("lblSet");
+
+        function setResetInterval(bool) {
+          if (bool) {
+            timer = setInterval(function(){
+              time++;
+              lblSet.innerHTML = "Set: "+set;
+              if (time>2){
+                time1++;
+                lblTimer.innerHTML = time1;
+                if (time1 == 12){
+                  setResetInterval(false);
+                  time1 = 0;
+                  time = 3;
+                  timer1 = setInterval(function(){
+                    time1 = 0;
+                    lblRecovery.innerHTML = "Recovery: "+recovery;
+                    recovery--;
+                    if (recovery < 0) {
+                      if (set >= 3) {
+                        clearInterval(timer1);
+                        clearInterval(timer);
+                        time =0;
+                        time1 =0;
+                        recovery = 36;
+                        set = 1;
+                        lblTimer.innerHTML = time1;
+                        lblSet.innerHTML = "Set: "+set;
+                        lblRecovery.innerHTML = "";
+                        audio.currentTime = 0;
+                        audio.pause();
+                        stop.style.display = "none";
+                        start.style.display = "block";
+                        setResetInterval(false);
+                      } else {
+                        recovery = 36;
+                        clearInterval(timer1);
+                        set++;
+                        lblSet.innerHTML = "Set: "+set;
+                        setResetInterval(true);
+                      }
+
+                    }
+                  }, 1000);
+                }
+              }
+            }, 2680);
+          } else {
+            clearInterval(timer);
+          }
+        }
+
+
+        start.addEventListener("click", function(e){
+          if (audio.paused) {
+            e.preventDefault();
+            setResetInterval(true);
+            start.style.display = "none";
+            stop.style.display = "block";
+            audio.play();
+          }
+        });
+        btnQuit.addEventListener("click", function(){
+          stop.click();
+          lblTimer.style.display = "none";
+          time = 0;
+          clearInterval(timer);
+          clearInterval(timer1);
+          time1 = 0;
+          audio.currentTime = 0;
+          audio.pause();
+        });
+
+        document.getElementById("btnNutriment").addEventListener("click", function(){
+          window.location = "nutrient.html";
+        });
+
+        document.getElementById("btnTrackWeight").addEventListener("click", function(){
+          window.location = "weight.html";
+        });
+
+        document.getElementById("btnPreviewRunning").addEventListener("click", function(){
+          //if (oldLocations.length==0) {
+        //    alert("There is no previous running track recoreded");
+        //  } else {
+
+          //}
+
+
+          window.location = "#previousRunPage";
+
+        });
+
+        document.getElementById("btnAPI").addEventListener("click",function(){
+          window.location = "#previousRunPage";
+          fetch("https://edamam-recipe-search.p.rapidapi.com/search?q=chicken", {
+	"method": "GET",
+	"headers": {
+		"x-rapidapi-host": "edamam-recipe-search.p.rapidapi.com",
+		"x-rapidapi-key": "d109c38533mshd77b69c2d641c16p128628jsnf19c4761ddeb"
+	}
+})
+.then(response => {
+	console.log(response);
+})
+.catch(err => {
+	console.log(err);
+});
+
+        });
+
+        stop.addEventListener("click", function(e){
+          if (!audio.paused) {
+            e.preventDefault();
+            setResetInterval(false);
+            stop.style.display = "none";
+            start.style.display = "block";
+            audio.pause();
+          }
+        });
+      }, false);
+    </script>
+
+    <script type="text/javascript">
+      $(document).ready(function(){
+        $("#checkboxMusic").prop("checked", true);
+        //CHECK IF THE DEVICE HAS LOCALSTORAGE
+          if (typeof(Storage)!=="undefined"){
+            //CHECK IF THE USER HAS ALREADY REGISTERED HIS/HER INFORMATIONS WITHIN THE application
+            if (window.localStorage.length<1) {
+              getToRegistertPage();
+              $('#saveBtn').click(function(){
+                //If the user does not have an account yet, register a new account and save it to the database and the localStorage
+                var usernameRegister = $("#usernameRegister").val();
+                var passwordRegister = $("#passwordRegister").val();
+                var firstname = $("#firstname").val();
+                var lastname = $("#lastname").val();
+                var age = $("#age").val();
+                var gender = $("#select-gender").find("option:selected").val();
+                var weight = $("#weight").val();
+                var height = $("#height").val();
+                $.post("register.php",{ usernameRegister:usernameRegister, passwordRegister: passwordRegister, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
+                    if (response == true) {
+                      alert("Your account has been created successfully!");
+                      $.mobile.changePage("#registerpage1");
+                    } else {
+                      alert(response);
+                    }
+                });
+            });
+            } else {
+              getToMainMenuPage();
+              showName();
+            }
+          } else {
+            //No support for web page
+          }
+
+          function showName(){
+            $("#welcometext").text("Hi "+localStorage.getItem('firstname')+"!");
+          }
+
+          function getToRegistertPage(){
+            $.mobile.changePage("#registerpage1");
+          }
+          function getToMainMenuPage(){
+            $.mobile.changePage("#mainmenu");
+          }
+
+          $("#btnSettings").click(function(){
+            $.mobile.changePage("#settings", {
+              transition: "slide"
+            });
+          });
+
+          $("#quitTimer").click(function(){
+            $.mobile.changePage("#workoutPlan");
+          });
+
+          $("#btnLogin").click(function(){
+              var usu = $("#txtuser").val();
+              var pass = $("#txtpassword").val();
+              $.post("login.php",{ usu : usu, pass : pass},function(response){
+                  var row = JSON.parse(response);
+                  localStorage.setItem('id', parseInt(row.id));
+                  localStorage.setItem('firstname',row.firstname);
+                  localStorage.setItem('lastname',row.lastname);
+                  localStorage.setItem('age',parseInt(row.age));
+                  localStorage.setItem('gender',parseInt(row.gender));
+                  localStorage.setItem('weight',parseInt(row.weight));
+                  localStorage.setItem('height',parseInt(row.height));
+                  $.mobile.changePage("#mainmenu");
+                  showName();
+              });
+          });
+
+          $("#btnEditInformation").click(function(){
+            $("#editfirstname").val(localStorage.getItem("firstname"));
+            $("#editlastname").val(localStorage.getItem("lastname"));
+            $("#editage").val(localStorage.getItem("age"));
+            $("#edit-select-gender").val(localStorage.getItem("gender"));
+            $("#editweight").val(localStorage.getItem("weight"));
+            $("#editheight").val(localStorage.getItem("height"));
+          });
+
+          $("#btnSaveEditInformation").click(function(){
+            localStorage.setItem('firstname',$("#editfirstname").val());
+            localStorage.setItem('lastname',$("#editlastname").val());
+            localStorage.setItem('age',parseInt($("#editage").val()));
+            localStorage.setItem('gender',parseInt($("#edit-select-gender").find("option:selected").val()));
+            localStorage.setItem('weight',parseInt($("#editweight").val()));
+            localStorage.setItem('height',parseInt($("#editheight").val()));
+            var id = localStorage.getItem('id');
+            var firstname = $("#editfirstname").val();
+            var lastname = $("#editlastname").val();
+            var age = $("#editage").val();
+            var gender = $("#edit-select-gender").find("option:selected").val();
+            var weight = $("#editweight").val();
+            var height = $("#editheight").val();
+            $.post("update.php",{ id : id, firstname : firstname, lastname : lastname, age:age, gender:gender, weight:weight, height:height},function(response){
+                if (response == true) {
+                  alert("Your account has been updated successfully!");
+                  $.mobile.changePage("#settings");
+                } else {
+                  alert(response);
+                }
+            });
+          });
+
+          var x;
+          var counter = 5;
+
+          $("#deletedProfile").click(function(){
+
+              x = setInterval(function(){
+              $("#counterDeletePage").text(counter);
+              counter--;
+              if(counter < 0) {
+                localStorage.clear();
+                $.mobile.changePage("#registerpage1");
+                clearInterval(x);
+              }
+            }, 1000);
+          });
+
+          $("#btnRegister").click(function(){
+            $.mobile.changePage("#registerpage2", {
+              transition: "slide"
+            });
+          });
+
+          $("#btnCancelDeleteInformation").click(function(){
+            counter = 5;
+            clearInterval(x);
+            $("#counterDeletePage").text(counter);
+          });
+
+          $("#workoutBtn").click(function(){
+            $.mobile.changePage("#workoutPlan", {
+              transition: "slide"
+            });
+          });
+
+          $("#btnLogout").click(function(){
+            window.localStorage.clear();
+            $("#txtuser").val("");
+            $("#txtpassword").val("");
+          });
+
+          $("#btnChest").click(function(){
+            $.mobile.changePage("#chestPage", {
+              transition: "slide"
+            });
+          });
+
+          $(".btnStartExercise").click(function(){
+            $.mobile.changePage("#timerPage",{
+              transition: "slide"
+            });
+          });
+
+          $(".back").click(function(){
+            $("video").each(function(){
+              this.currentTime = 0;
+              this.pause();
+            })
+          });
+
+          $("#runningBtn").click(function(){
+            $.mobile.changePage("#runningPage",{
+              transition: "slide"
+            });
+            $("#timeRun").val("05:00");
+          });
+
+
+      });
+
+
+
+    </script>
+
+  </head>
+  <body>
+    <!--Register page starts here, this page appears only when the user has not yet registered his/here information within the application-->
+    <div data-role="page" id="registerpage1" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content firstpage">
+        <h3>LOGIN</h3>
+        <form id="form_login">
+            <div data-role="fieldcontain" class="ui-hide-label">
+                <label for="txtuser">Username:</label>
+                <input type="text" name="txtuser" id="txtuser" value="" placeholder="Username" />
+            </div>
+            <div data-role="fieldcontain" class="ui-hide-label">
+                <label for="txtpassword">Password:</label>
+                <input type="password" name="txtpassword" id="txtpassword" value="" placeholder="Password" />
+            </div>
+            <input type="button" value="Login" id="btnLogin">
+        </form>
+        <input type="button" value="Register" id="btnRegister">
+
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--Register page ends here-->
+
+    <!--Form page for registration starts here-->
+    <div data-role="page" id="registerpage2" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content">
+        <form class="" action="index.html" method="post">
+          Username:
+          <input type="text" name="usernamRegister" id="usernameRegister" value="" placeholder="Username">
+          Password:
+          <input type="password" name="passwordRegister" id="passwordRegister" value="" placeholder="Password">
+          First Name:
+          <input type="text" name="firstname" id="firstname" value="" placeholder="First Name">
+          Last Name:
+          <input type="text" name="lastname" id="lastname" value="" placeholder="Last Name">
+          Age:
+          <input type="number" name="age" id="age" value="" placeholder="Age">
+          Gender:
+          <select name="select-gender" id="select-gender" data-role="select">
+                  <option value="1">Male</option>
+                  <option value="0">Female</option>
+          </select>
+          Weight (Kg):
+          <input type="number" name="weight" id="weight" value="" placeholder="60">
+          Height (Cm):
+          <input type="number" name="height" id="height" value="" placeholder="168">
+
+        </form>
+
+        <a href="#" id="saveBtn" class="ui-btn-icon-left" data-role="button" data-transition="slide" data-icon="check">Save</a>
+        <a href="#registerpage1" class="ui-btn-icon-left" data-role="button" data-direction="reverse" data-transition="slide" data-icon="back">Back</a>
+
+
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+
+    </div>
+
+    <!--Main menu starts here-->
+    <div data-role="page" id="mainmenu" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+        <div class="welcome">
+          <p id="welcometext"></p>
+        </div>
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:center">
+        <h3 style="text-align:center">MAIN MENU</h3>
+        <table border="0" style="margin: 0 auto;">
+          <tr>
+            <td>
+              <button  id="workoutBtn" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px">
+                <img src="images/icons/png/007-dumbbell.png" alt="">
+              </button>
+              <span>Workout Plan</span>
+            </td>
+            <td>
+              <button id="btnNutriment" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px">
+                <img src="images/icons/png/006-diet.png" alt="">
+              </button>
+              <span>Nutriment Plan</span>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="1">
+              <button id="runningBtn" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px;">
+                <img src="images/icons/png/031-running.png" alt="">
+              </button>
+              <span>Running</span>
+            </td>
+            <td>
+              <button id="btnAPI" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px">
+                <img src="images/icons/png/013-fruits.png" alt="">
+              </button>
+              <span>Research diet and Recipe</span>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button id="btnSettings" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px;">
+                <img src="images/icons/settings.png" alt="">
+              </button>
+              <span>Settings</span>
+            </td>
+            <td>
+              <button id="btnTrackWeight" type="button" name="button" class="ui-btn mmBtn" style="width: 140px;height: 140px; margin: 10px 10px;">
+                <img src="images/icons/png/047-scale.png" alt="">
+              </button>
+              <span>Track Weight</span>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--Main menu ends here-->
+
+    <!--Settings starts here-->
+    <div data-role="page" id="settings" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:center">
+        <h3 style="text-align:center">Settings</h3>
+        <nav>
+          <ul data-role="listview" data-inset="true" data-divider-theme="a">
+            <li data-role="list-divider">About you</li>
+            <li> <a id="btnEditInformation" href="#editInformation" data-transition="slide">Edit my information</a> </li>
+            <li> <a id="deletedProfile" href="#deletedProfile" data-transition="slide">Delete my profile</a> </li>
+            <li> <a id="btnLogout" href="#registerpage1" data-transition="slide">Log out from this application</a> </li>
+          </ul>
+          <ul data-role="listview" data-inset="true" data-divider-theme="a">
+            <li data-role="list-divider">General</li>
+            <li> <a href="#editInformation">Report a bug</a> </li>
+            <li> <a href="#editInformation">About this application</a> </li>
+          </ul>
+
+          <a href="#mainmenu" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to main menu</a>
+
+        </nav>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--Settings stops here-->
+
+    <!--editInformation starts here-->
+    <div data-role="page" id="editInformation" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:center">
+        <h3 style="text-align:center">Edit my information</h3>
+
+        <form class="" action="index.html" method="post">
+          First Name:
+          <input type="text" name="editfirstname" id="editfirstname" value="">
+          Last Name:
+          <input type="text" name="editlastname" id="editlastname" value="">
+          Age:
+          <input type="number" name="editage" id="editage" value="">
+          Gender:
+          <select name="edit-select-gender" id="edit-select-gender" data-role="select">
+                  <option value="1">Male</option>
+                  <option value="2">Female</option>
+          </select>
+          Weight (Kg):
+          <input type="number" name="editweight" id="editweight" value="">
+          Height (Cm):
+          <input type="number" name="editheight" id="editheight" value="">
+
+        </form>
+        <a href="#" id="btnSaveEditInformation" data-role="button" data-icon="check" data-transition="slide" data-direction="reverse">Save</a>
+        <a href="#settings" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to Settings</a>
+
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--editInformation ends here-->
+
+    <!--deletedProfile page starts here-->
+    <div data-role="page" id="deletedProfile" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:center">
+        <div class="delete">
+          <p id="delete">Your profile has been deleted successfully! <br> You will be redirected to starting page in <span id="counterDeletePage">5</span></p>
+          <a href="#settings" id="btnCancelDeleteInformation" data-role="button" data-icon="back" data-transition="slide" data-direction="reverse">Cancel</a>
+
+        </div>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--deletedProfile page ends here-->
+
+    <!--workoutPlan page starts here-->
+    <div data-role="page" id="workoutPlan" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div class="ui-content" data-role="main" style="text-align: center">
+        <h3 style="text-align:center">WORKOUT PLAN</h3>
+        <table border="0" style="margin: 0 auto;">
+          <tr>
+            <td colspan="1">
+              <button  id="btnChest" type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/chest.jpg" alt="">
+                <span class="textInsideButton">Chest</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/legs.png" alt="">
+                <span class="textInsideButton">Legs</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/back.jpg" alt="">
+                <span class="textInsideButton">Back</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/shoulder.jpg" alt="">
+                <span class="textInsideButton">Shoulders</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button id="btnAbs" type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/abs.jpg" alt="">
+                <span class="textInsideButton">Abs</span>
+              </button>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="button" name="button" class="ui-btn xxxBtn">
+                <img src="images/arms.jpeg" alt="">
+                <span class="textInsideButton">Arms</span>
+              </button>
+            </td>
+          </tr>
+        </table>
+        <a href="#mainmenu" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to main menu</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--workoutPlan page ends here-->
+
+    <!--chest page starts here-->
+    <div data-role="page" id="chestPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:center">
+        <nav>
+          <ul data-role="listview" data-inset="true" data-divider-theme="a">
+            <li data-role="list-divider">EXERCISE 1</li>
+            <li> <a href="#benchPressPage" data-transition="slide">Bench Press</a> </li>
+            <button class="btnStartExercise" type="button" name="button">START</button>
+          </ul>
+          <ul data-role="listview" data-inset="true" data-divider-theme="a">
+            <li data-role="list-divider">EXERCISE 2</li>
+            <li> <a href="#inclineBenchPressPage" data-transition="slide">Incline Bench Press</a> </li>
+            <button class="btnStartExercise" type="button" name="button">START</button>
+          </ul>
+          <ul data-role="listview" data-inset="true" data-divider-theme="a">
+            <li data-role="list-divider">EXERCISE 3</li>
+            <li> <a href="#dipsPage" data-transition="slide">Dips</a> </li>
+            <button class="btnStartExercise" type="button" name="button">START</button>
+          </ul>
+
+          <br>
+
+          <a href="#workoutPlan" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back</a>
+          <br>
+        </nav>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+
+      </div>
+    </div>
+    <!--chest page ends here-->
+
+    <!--Beench press page starts here-->
+    <div data-role="page" id="benchPressPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Bench Press</h3>
+        <ul>
+          <li>Series: 3</li>
+          <li>Repetitions: 12</li>
+          <li>Break: 30s</li>
+        </ul>
+        <p>The bench press is an upper-body weight
+        training exercise in which the trainee
+        presses a weight upwards while lying on
+        a weight training bench. The exercise uses
+        the pectoralis major, the anterior deltoids,
+        and the triceps, among other stabilizing muscles.
+         A barbell is generally used to hold the weight,
+         but a pair of dumbbells can also be used.</p>
+
+         <img style="width:320px; margin: 0 auto;text-align:center" src="images/benchpress.jpg" alt="">
+
+         <h4>VIDEO</h4>
+         <video width="320" height="240" controls>
+            <source src="videos/benchpress.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+         </video>
+         <a href="#chestPage" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- Bench press page ends here-->
+
+    <!--Incline Bench press page starts here-->
+    <div data-role="page" id="inclineBenchPressPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Incline Bench Press</h3>
+        <ul>
+          <li>Series: 3</li>
+          <li>Repetitions: 12</li>
+          <li>Break: 30s</li>
+        </ul>
+        <p>This exercise develops the lower chest. It also stretches
+          the middle part in the chest and connects the triceps to work,
+          to a lesser extent, the front deltas. The developed lower
+          section of the breast emphasizes the relief and gives more
+          emphasis to the muscles of the breast due to its beautiful shape.</p>
+
+         <img style="width:320px; margin: 0 auto;text-align:center" src="images/inclinebenchpress.jpg" alt="">
+
+         <h4>VIDEO</h4>
+         <video width="320" height="240" controls>
+            <source src="videos/inclinebecnhpress.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+         </video>
+         <a href="#chestPage" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!--Incline Bench press page ends here-->
+
+    <!--Dips page starts here-->
+    <div data-role="page" id="dipsPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Dips</h3>
+        <ul>
+          <li>Series: 3</li>
+          <li>Repetitions: 12</li>
+          <li>Break: 30s</li>
+        </ul>
+        <p>Chest dips are similar to tricep dips but—as you can
+          probably guess—they work the chest muscles instead.
+          Whether you have your own parallel bars, a gym membership
+          , or some furniture that you can do the motion from, chest
+          dips are simple exercises that can create great results.
+          With a bit of effort and perseverance, you can start
+          adding weight as you do your dips and pack on the chest
+          muscle!</p>
+
+         <img style="width:320px; margin: 0 auto;text-align:center" src="images/dips.jpg" alt="">
+
+         <h4>VIDEO</h4>
+         <video width="320" height="240" controls>
+            <source src="videos/dips.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+         </video>
+         <a href="#chestPage" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- Dips page ends here-->
+
+    <!--Exercise page starts here-->
+    <div data-role="page" id="timerPage" data-theme="a">
+
+      <div data-role="main" class="ui-content" style="text-align:center; background-color: black;height:100vh">
+        <button id="btnStartExercise" type="button" style="vertical-align: middle;background-color: green; color: #ffffff;border-radius:50%; width:200px; height: 200px; margin: 0 auto;"name="button">START</button>
+        <button id="btnStopExercise" type="button" style="vertical-align: middle;display:none;background-color: red; color: #ffffff;border-radius:50%; width:200px; height: 200px; margin: 0 auto;"name="button">STOP</button>
+        <audio id="myAudio">
+          <source src="sound.mp3" type="audio/mpeg">
+        </audio>
+        <div id="counterExercise" style="font-size:200px; color:white">
+
+        </div>
+        <div id="counterRecovery" style="font-size:75px; color:white">
+
+        </div>
+        <div id="lblSet" style="font-size:50px; color:white">
+
+        </div>
+      </div>
+
+      <div data-role="footer" data-position="fixed" style="text-align:center; background-color: black;">
+        <button id="quitTimer" type="button" name="button">Quit exercise</button>
+      </div>
+    </div>
+    <!-- Exercise page ends here-->
+
+    <!--RUNNING starts here-->
+    <div data-role="page" id="runningPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Running</h3>
+        <form>
+          <label for="time-2">Set up a timer:</label>
+          <input type="time" data-clear-btn="true" name="time-2" id="timeRun" value="">
+          <label>
+          <input type="checkbox" id="checkboxMusic" name="checkboxMusic" value=""> Play music while running
+          </label>
+          <br>
+          <button id="btnStartRunning" type="button" style="vertical-align: middle;background-color: #6699ff; color: white;border-radius:50%; width:200px; height: 200px; margin: 0 auto;"name="button">START</button>
+          <br>
+          <br>
+          <button type="button" id="btnPreviewRunning" name="button">Preview last running</button>
+        </form>
+         <a href="#mainmenu" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to main menu</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- RUNNING ends here-->
+
+    <!--RUNNING page starts here-->
+    <div data-role="page" id="runPage" data-theme="a">
+
+      <div data-role="main" class="ui-content" style="text-align:center; height: 100vh">
+        <h3 style="text-align:center">RUN</h3>
+        <div id="mapid" style="text-align: left;border: 1px dotted black; border-radius: 15px; background: #ffffff;padding: 10px;box-shadow: 5px 10px 8px #888888;height:400px;margin:0 auto;">
+          <h5>Running time left:</h5>
+          <div id="lblRunTimer" style="font-size: 50px">
+            00:00
+          </div>
+          <h5>Distance travelled:</h5>
+          <div id="lblDistance"  style="font-size: 50px">
+            000 meters
+          </div>
+        </div>
+        <table width="100%" style="margin-top: 30px;">
+          <tr>
+            <td colspan="3">MUSIC</td>
+          </tr>
+          <tr>
+            <td width="33.3333%"><button id="previousTrack" type="button" name="button">Previous</button></td>
+            <td width="33.3333%"><button id="playpause" type="button" name="button">Play</button></td>
+            <td width="33.3333%"><button id="nextTrack" type="button" name="button">Next</button></td>
+          </tr>
+        </table>
+        <a id="stopRun" href="#runningPage" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Stop and go back</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- RUNNING page ends here-->
+
+    <!--previous starts here-->
+    <div data-role="page" id="previousRunPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Previous</h3>
+        <div id="map" style="width:300; height:500px;margin: 0 auto;">
+          <script type="text/javascript">
+          var latlngs = [
+             [17.385044, 78.486671],
+             [16.506174, 80.648015],
+             [17.686816, 83.218482]
+          ];
+
+
+          var map = L.map('map').setView([-20.16527900, 57.4963800], 16);
+
+          L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            maxZoom: 18,
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+              '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+              'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            id: 'mapbox.streets'
+          }).addTo(map);
+
+          </script>
+        </div>
+        <a href="#runningPage" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to main menu</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- previous ends here-->
+
+    <!--API starts here-->
+    <div data-role="page" id="previousRunPage" data-theme="a">
+      <div data-role="header">
+        <img src="images/logo.png" alt="" class="logo">
+      </div>
+
+      <div data-role="main" class="ui-content" style="text-align:left">
+        <h3 style="text-align:center">Recipe Search and Diet API Documentation</h3>
+        <p id="result"></p>
+
+        <a href="#mainmenu" class="back ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" data-direction="reverse">Go back to main menu</a>
+      </div>
+
+      <div data-role="footer" data-position="fixed">
+        <h1>Fitness application</h1>
+      </div>
+    </div>
+    <!-- API ends here-->
+
+  </body>
+</html>

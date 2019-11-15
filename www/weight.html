@@ -1,0 +1,104 @@
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="js/jquery.mobile-1.4.5.css">
+  <script src="js/jquery.js"></script>
+  <script src="js/jquery.mobile-1.4.5.js"></script>
+  <script src="cordova.js"></script>
+  <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" >
+  <script>
+  var $=function( id ){return document.getElementById(id);};
+  function msystem()
+  {
+    if($('msw').value=='metric'){
+      $('thw').innerHTML=' (Cms)';
+    }else{$('thw').innerHTML=' (inches)';};
+    if($('msm').value=='metric'){
+      $('thm').innerHTML=' (Cms)';$('twm').innerHTML=' (Kgs)';}
+      else{$('thm').innerHTML=' (inches)';
+      $('twm').innerHTML=' (lbs)';};if($('msf').value=='metric'){
+        $('thf').innerHTML=' (Cms)';$('tneck').innerHTML=' (Cms)';
+        $('twaist').innerHTML=' (Cms)';
+        $('thips').innerHTML=' (Cms)';
+      }else{
+        $('thf').innerHTML=' (inches)';
+        $('tneck').innerHTML=' (inches)';
+        $('twaist').innerHTML=' (inches)';
+        $('thips').innerHTML=' (inches)';}}
+function bmass (){
+  var ms=$('msm').value;
+  var height=$('hm').value;
+  var weight=$('wm').value;
+  if(height==null || height.length==0 || weight==null || weight.length==0 )
+  {
+    $('bmi').value="Pl. enter data.";
+  }else{
+    $('bmi').value="";}
+    if(ms=='metric'&&height>0){$('bmi').value=Math.round(weight/(height*height/10000)*100)/100+" kg/m2 "
+  }else if(ms=='us'&&height>0)
+  {$('bmi').value=Math.round(703*weight/(height*height)*100)/100+" kg/m2 " }}</script>
+
+<style>
+#outer{width:350px;background:#fff;text-align:center;padding-left:30px}
+#cover{border:2px solid #111;border-radius:7px;box-shadow:inset 0 0 13px #888;padding:7px 0}
+.main{
+  table-layout:fixed;
+  width:94%;
+  border:0;
+  border-collapse:collapse;
+  margin:0 auto;
+}
+.main td{padding:0 8px;vertical-align:middle;text-align:left;border:0;font:500 11px arial}
+.main input{width:96%;border:1px solid #ccc;margin:2px 0;padding:0 2%;height:17px;text-align:right;font:500 11px arial;background:none;}td.ac {text-align:center}
+.main select{width:100%;border:1px solid #ccc;margin:2px 0;background:#fff;height:18px;font:500 11px arial}.main button{width:100%;font:600 12px arial;margin:2px 0;}.w60{width:60%}.w40{width:40%}</style>
+
+</head>
+<body
+<div data-role="page" id="nutrimentPlan" data-theme="a">
+  <div data-role="header">
+    <img src="images/logo.png" alt="" width="100%" class="logo">
+  </div>
+  <section>
+    <div id=outer>
+      <h3>Body Mass Index (BMI) Calculator</h3>
+      <div id=cover>
+        <form name=fn>
+          <table class=main>
+            <col class=w60>
+          <tr>
+            <td>Measuring System<td>
+                <select id=msm onchange=msystem();>
+                  <option value=metric>Metric (Kgs, Cms)</option>
+                  <option value=us>US (lbs, inches)</option>
+                </select>
+              </tr>
+                   <tr> <td>Height<span id=thm> (Cms)</span></td>
+                    <td><input id=hm></td></tr>
+
+                    <tr><td>Weight <span id=twm> (Kgs)</span></td>
+                        <td><input id=wm></td></tr>
+
+                        <tr>
+                          <td><button type=reset>Reset</button></td>
+                          <td><button type=button onclick='bmass();'>Submit</button></td></tr>
+
+                        <tr><td>Body Mass Index (BMI)<td><input id=bmi class=op></td> </tr>
+                        <tr><td>Normal BMI range<td><input class=op id=nbmi value='18.5-25 kg/m2'></td></tr>
+                        <tr><td colspan=2 class=ac><br>The calculations are based on WHO recommendations.</td></tr>
+        </table>
+                </form>
+
+                      </div></div>
+  <img src="images/bmi.jpg" style="height:400px" width="100%">
+<a href="index.html" class="ui-btn ui-shadow ui-corner-all ui-icon-arrow-l ui-btn-icon-left" data-transition="slide" onclick="window.location.href='index.html'">Go back to main menu</a>
+
+
+
+      </div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,48 @@
+.logo{
+  width: 100%;
+}
+
+.firstpage {
+  background-color:rgb(219, 233, 255);
+  text-align: center;
+  color:black;
+}
+
+.ui-content {
+  background-color:rgb(219, 233, 255);
+}
+
+.mmBtn {
+  width: 50px;
+  height: 50px;
+  border-radius: 15px;
+}
+
+.mmBtn img {
+  width: 100%;
+}
+
+.welcome {
+  background: rgb(255, 232, 168);
+  width: 100%;
+  text-align: center;
+  padding: 1px;
+}
+
+.xxxBtn {
+  border-radius: 15px;
+  width: 100px;
+  height: 100px;
+  margin: 0 atuo;
+}
+
+.xxxBtn img {
+  width: 30%;
+  float: left;
+  border-rdius: 10px;
+}
+
+.textInsideButton {
+  padding-top: 30px;
+  float: right;
+}
