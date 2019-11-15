@@ -1,4 +1,5 @@
-<?php
+ <?php
+ header("Access-Control-Allow-Origin: *");
 
 $server = "remotemysql.com";
 $username = "yRR1O9D20g";
